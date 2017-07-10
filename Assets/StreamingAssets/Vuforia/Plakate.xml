@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="GrueneShoppen" size="1.000000 1.500000" />
+    <ImageTarget name="FDPRadelTour" size="1.000000 1.500000" />
+    <ImageTarget name="FDP_AllesSagen" size="1.000000 1.500000" />
+    <ImageTarget name="CSUSicherheit" size="1.000000 1.535156" />
+    <ImageTarget name="Post" size="1.000000 1.500000" />
+  </Tracking>
+</QCARConfig>
