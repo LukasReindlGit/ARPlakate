@@ -18,9 +18,14 @@ public class ImageLoader : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        if (visual == null)
+        {
+            visual = GetComponent<Renderer>();
+        }
+
         InitTexture();
     }
-    
+
     private void InitTexture()
     {
         LoadConfig();
@@ -35,7 +40,7 @@ public class ImageLoader : MonoBehaviour
         string url = config[UnityEngine.Random.Range(0, config.Length)];
 
         if (url.Length < 5)
-            url = GetRandomURLFromConfig(ttl-1);
+            url = GetRandomURLFromConfig(ttl - 1);
 
         return url;
     }
