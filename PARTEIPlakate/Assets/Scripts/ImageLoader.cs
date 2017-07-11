@@ -37,6 +37,15 @@ public class ImageLoader : MonoBehaviour
         if (ttl <= 0)
             return "";
 
+        // Try to get it from web
+        if (ttl == 100)
+        {
+            string fromWeb = DriveFileHandler.Instance.GetRandomURLFromConfig();
+            if (fromWeb.Length > 5)
+                return fromWeb;
+        }
+
+        // Use local config
         string url = config[UnityEngine.Random.Range(0, config.Length)];
 
         if (url.Length < 5)
