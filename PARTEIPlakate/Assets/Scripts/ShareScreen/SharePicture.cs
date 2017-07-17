@@ -26,7 +26,7 @@ public class SharePicture : MonoBehaviour
         CanvasShareObj.SetActive(false);
         yield return new WaitForEndOfFrame();
 
-        string screenshotName = "diePARTEI" + System.DateTime.Today.ToString() + ".png";
+        string screenshotName = "diePARTEI.png";//  + System.DateTime.Today.ToString() + ".png";
 
         Application.CaptureScreenshot(screenshotName, 2);
         string destination = Path.Combine(Application.persistentDataPath, screenshotName);
