@@ -11,6 +11,7 @@ public class ImageLoader : MonoBehaviour
     [SerializeField]
     TextAsset configFile;
     string[] config;
+    
 
     [SerializeField]
     Renderer visual;
@@ -29,6 +30,18 @@ public class ImageLoader : MonoBehaviour
     private void InitTexture()
     {
         LoadConfig();
+        StartCoroutine(LoadConfigAndTexture());
+      //  StartCoroutine(LoadTextureFromURL(GetRandomURLFromConfig()));
+    }
+
+    private IEnumerator LoadConfigAndTexture()
+    {
+        int waited = 0;
+        while(!DriveFileHandler.initialized && waited<20)
+        {
+            waited++;
+            yield return new WaitForSeconds(1);
+        }
         StartCoroutine(LoadTextureFromURL(GetRandomURLFromConfig()));
     }
 
@@ -40,9 +53,14 @@ public class ImageLoader : MonoBehaviour
         // Try to get it from web
         if (ttl == 100)
         {
-            string fromWeb = DriveFileHandler.Instance.GetRandomURLFromConfig();
-            if (fromWeb.Length > 5)
-                return fromWeb;
+            if (DriveFileHandler.Instance != null)
+            {
+                string fromWeb = DriveFileHandler.Instance.GetRandomURLFromConfig();
+                if (fromWeb.Length > 5)
+                {
+                    return fromWeb;
+                }
+            }
         }
 
         // Use local config

@@ -13,6 +13,11 @@ public class DriveFileHandler : MonoBehaviour
     
     [SerializeField]
     ConfigElement[] configs;
+
+    [SerializeField]
+    Text text;
+
+    public static bool initialized = false;
     
     // Use this for initialization
     void Awake()
@@ -32,6 +37,8 @@ public class DriveFileHandler : MonoBehaviour
 
         WWW www = new WWW(url);
         yield return www;
+
+        text.text = www.text;
 
         // Split on Line endings
         string[] tmpArr = Regex.Split(www.text, "\n|\r|\r\n");
@@ -66,7 +73,7 @@ public class DriveFileHandler : MonoBehaviour
             
         }
         configs = urlList.ToArray();
-        
+        initialized = true;
     }
 
 
