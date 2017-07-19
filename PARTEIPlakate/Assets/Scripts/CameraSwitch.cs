@@ -22,6 +22,7 @@ public class CameraSwitch : MonoBehaviour
                 break;
             case CameraDevice.CameraDirection.CAMERA_FRONT:
                 dirToUse = CameraDevice.CameraDirection.CAMERA_BACK;
+                
                 break;
             default:
                 dirToUse = CameraDevice.CameraDirection.CAMERA_DEFAULT;
