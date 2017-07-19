@@ -12,11 +12,9 @@ public class SharePicture : MonoBehaviour
     public event DefaultDelegate OnFinishedShare;
 
     public GameObject[] disableDuringScreenshot;
-    public GameObject backplane;
-    GameObject tmpBackplane;
+    
 
-    public Material emptyMat;
-
+    string fileName = "";
 
     private bool isProcessing = false;
     private bool isFocus = false;
@@ -24,14 +22,30 @@ public class SharePicture : MonoBehaviour
     public void ShareBtnPress()
     {
         if (!isProcessing)
-        {
+        {            
             StartCoroutine(DoWorkflow());
         }
     }
 
+    public void TakePictureBtnPress()
+    {
+
+        StateHandler.Instance.SetState(StateHandler.STATE.PreviewPic);
+
+        // Disable what have to be disabled
+        foreach (var d in disableDuringScreenshot)
+        {
+            d.SetActive(false);
+        }
+        
+        CameraDevice.Instance.Stop();
+    }
+
     IEnumerator DoWorkflow()
     {
-        Debug.Log("Starting workflow");
+        StateHandler.Instance.SetState(StateHandler.STATE.TakingScreenshot);
+
+        yield return new WaitForSeconds(0.5f);
 
         isProcessing = true;
 
@@ -39,15 +53,8 @@ public class SharePicture : MonoBehaviour
         {
             d.SetActive(false);
         }
-
-
-        yield return new WaitForEndOfFrame();
-
-        CameraDevice.Instance.Stop();
-
-       // SwitchBackPlanes();
-
-        yield return StartCoroutine(CaptureScreenshot2());
+        
+        yield return StartCoroutine(CaptureScreenshot());
         yield return StartCoroutine(ShareImage());
 
         isProcessing = false;
@@ -57,92 +64,23 @@ public class SharePicture : MonoBehaviour
             d.SetActive(true);
         }
     }
-
-    private void SwitchBackPlanes()
-    {
-        if(tmpBackplane!=null)
-        {
-            Destroy(tmpBackplane);
-        }
-
-        tmpBackplane = new GameObject();
-        tmpBackplane.name = "TEMP_BGPlane";
-
-        // Set size pos rot
-        tmpBackplane.transform.parent = backplane.transform.parent;
-        tmpBackplane.transform.rotation = backplane.transform.rotation;
-        tmpBackplane.transform.position = backplane.transform.position;
-        tmpBackplane.transform.localScale = backplane.transform.localScale;
-        tmpBackplane.transform.parent = null;
-
-        // MESH: 
-        Mesh myMesh = new Mesh();
-        Mesh tmpMesh = backplane.GetComponent<MeshFilter>().sharedMesh;
-        myMesh.vertices = tmpMesh.vertices;
-        myMesh.triangles = tmpMesh.triangles;
-        myMesh.uv = tmpMesh.uv;
-
-
-        tmpBackplane.AddComponent<MeshFilter>().sharedMesh = myMesh;
-
-        // TEST: 
-       // tmpBackplane.transform.position = new Vector3(0,0,300);
-
-        // Material
-        MeshRenderer rend = tmpBackplane.AddComponent<MeshRenderer>();
-        rend.material = new Material(emptyMat);
-        // rend.material.mainTexture = backplane.GetComponent<Renderer>().material.mainTexture;
-
-        // rend.material.mainTexture = GetWebcamTexture();
-
-        Texture2D tex = new Texture2D(Screen.width, Screen.height);
-        tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-        tex.Apply();
-
-        rend.material.mainTexture = tex;
-
-
-        backplane.SetActive(false);
-        
-    }
-
-    private Texture GetWebcamTexture()
-    {
-        WebCamTexture tex = new WebCamTexture();
-        tex.Play();
-
-        return tex;
-    }
-
+    
     IEnumerator CaptureScreenshot()
     {
-        CameraDevice.Instance.Stop();
 
-        yield return new WaitForEndOfFrame();
+        fileName = GetNewFilename();
 
-        string screenshotName = "diePARTEI.jpg";//  + System.DateTime.Today.ToString() + ".png";
-
-        Application.CaptureScreenshot(screenshotName, 2);
-        string destination = Path.Combine(Application.persistentDataPath, screenshotName);
-
-        yield return new WaitForSecondsRealtime(0.3f);
-    }
-
-    IEnumerator CaptureScreenshot2()
-    {
-        
         Texture2D tex = new Texture2D(Screen.width, Screen.height);
         tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         tex.Apply();
 
         byte[] bytes = tex.EncodeToJPG();
 
-        File.WriteAllBytes(Application.temporaryCachePath+"/diePARTEI.jpg", bytes);
+        File.WriteAllBytes(Application.temporaryCachePath+"/"+fileName, bytes);
         Debug.Log("PATH: " + Application.temporaryCachePath);
         yield return null;
     }
-
-
+    
     IEnumerator ShareImage()
     {
         if (!Application.isEditor)
@@ -151,7 +89,7 @@ public class SharePicture : MonoBehaviour
             AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
             intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
             AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
-            AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse", "file://" + Application.temporaryCachePath + "/diePARTEI.jpg");
+            AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse", "file://" + Application.temporaryCachePath + "/"+fileName);
             intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_STREAM"),
                 uriObject);
            // intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), "Can you beat my score?");
@@ -173,10 +111,23 @@ public class SharePicture : MonoBehaviour
         {
             OnFinishedShare.Invoke();
         }
+
+        yield return new WaitForSeconds(1);
+        StateHandler.Instance.SetState(StateHandler.STATE.Explore);
     }
 
     private void OnApplicationFocus(bool focus)
     {
         isFocus = focus;
+
+       // StateHandler.Instance.SetState(StateHandler.STATE.Explore);
+    }
+    
+    private string GetNewFilename()
+    {
+        string newName = "diePARTEI_" + UnityEngine.Random.Range(0, 99999999).ToString() + ".jpg";
+
+        Debug.Log(newName);
+        return newName;
     }
 }

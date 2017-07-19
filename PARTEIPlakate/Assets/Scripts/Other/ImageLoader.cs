@@ -15,6 +15,12 @@ public class ImageLoader : MonoBehaviour
     [SerializeField]
     Renderer visual;
 
+    [SerializeField]
+    bool loadFromInternet = true;
+
+    [SerializeField]
+    Texture2D[] fallBackTextures;
+
     // Use this for initialization
     void Start()
     {
@@ -28,8 +34,15 @@ public class ImageLoader : MonoBehaviour
 
     private void InitTexture()
     {
-        LoadConfig();
-        StartCoroutine(LoadTextureFromURL(GetRandomURLFromConfig()));
+        if (loadFromInternet)
+        {
+            LoadConfig();
+            StartCoroutine(LoadTextureFromURL(GetRandomURLFromConfig()));
+        }
+        else
+        {
+            visual.material.mainTexture = fallBackTextures[UnityEngine.Random.Range(0, fallBackTextures.Length)];
+        }
     }
 
     private string GetRandomURLFromConfig(int ttl = 100)

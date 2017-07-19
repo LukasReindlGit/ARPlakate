@@ -5,6 +5,10 @@ using Vuforia;
 
 public class CameraSwitch : MonoBehaviour
 {
+    public delegate void CamUpdate(CameraDevice.CameraDirection newDir);
+
+    public static event CamUpdate SwitchedCam;
+
     public void SwitchCamera()
     {
         CameraDevice camDev = CameraDevice.Instance;
@@ -34,5 +38,10 @@ public class CameraSwitch : MonoBehaviour
 
         camDev.Init(dirToUse);
         camDev.Start();
+
+        if(SwitchedCam!=null)
+        {
+            SwitchedCam.Invoke(dirToUse);
+        }
     }
 }
