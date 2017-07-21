@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
   <Tracking>
+    <ImageTarget name="SPD_SozialeDimension" size="1.000000 1.500000" />
+    <ImageTarget name="SPD_PostFuerSie" size="1.000000 1.500000" />
+    <ImageTarget name="SPD_DanielFoest1" size="1.000000 1.500000" />
+    <ImageTarget name="SPD_ClaudiaTausend" size="1.000000 1.406130" />
+    <ImageTarget name="Post" size="1.000000 1.500000" />
     <ImageTarget name="GrueneShoppen" size="1.000000 1.500000" />
+    <ImageTarget name="Gruene_Dieselgate" size="1.000000 1.500000" />
     <ImageTarget name="FDPRadelTour" size="1.000000 1.500000" />
+    <ImageTarget name="FDP_Manfred_WarumWarten" size="1.000000 1.500000" />
+    <ImageTarget name="FDP_Digitalisierung" size="1.000000 1.500000" />
     <ImageTarget name="FDP_AllesSagen" size="1.000000 1.500000" />
     <ImageTarget name="CSUSicherheit" size="1.000000 1.535156" />
-    <ImageTarget name="Post" size="1.000000 1.500000" />
+    <ImageTarget name="CSU_Dobrindt_Bilgri_Stefinger" size="1.000000 1.500000" />
+    <ImageTarget name="CSU_Bildung" size="1.000000 1.500000" />
+    <ImageTarget name="CryForEquality" size="1.000000 1.500000" />
   </Tracking>
 </QCARConfig>
