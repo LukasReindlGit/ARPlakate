@@ -24,8 +24,6 @@ public class ImageApply : MonoBehaviour, ITrackableEventHandler {
 
     public void OnTrackableStateChanged(TrackableBehaviour.Status previousStatus, TrackableBehaviour.Status newStatus)
     {
-        Debug.Log("NEW STATE: " + newStatus.ToString());
-
         if(!gotTexture && newStatus == TrackableBehaviour.Status.TRACKED)
         {
             InitTexture();

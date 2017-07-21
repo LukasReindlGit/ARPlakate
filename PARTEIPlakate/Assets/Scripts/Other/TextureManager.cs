@@ -12,6 +12,9 @@ public class TextureManager : MonoBehaviour {
 
     List<Texture2D> allTextures= new List<Texture2D>();
 
+    [SerializeField]
+    Texture2D[] allTexturesArr;
+
     private void Awake()
     {
         Instance = this;
@@ -31,5 +34,11 @@ public class TextureManager : MonoBehaviour {
     private Texture2D GetRandomTextureFromList()
     {
         return allTextures[UnityEngine.Random.Range(0, allTextures.Count)];
+    }
+
+    internal void AddTexture(Texture2D tex)
+    {
+        allTextures.Add(tex);
+        allTexturesArr = allTextures.ToArray();
     }
 }

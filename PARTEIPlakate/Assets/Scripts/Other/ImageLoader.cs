@@ -7,28 +7,33 @@ using System.Text.RegularExpressions;
 
 public class ImageLoader : MonoBehaviour
 {
+    /** Pipeline:
+     * 
+     * Load config
+     * 
+     * Foreach url:
+     *      - Create Hashed name
+     *      - Save name to namelist
+     * 
+     *      - Does File exist?
+     *          No:
+     *              - Load Texture
+     *              - Save file in cache
+     * 
+     *      - Load Texture from cache
+     * 
+     */
 
     [SerializeField]
     TextAsset configFile;
-    string[] config;
-
     [SerializeField]
-    Renderer visual;
+    string[] config;
 
     [SerializeField]
     bool loadFromInternet = true;
 
-    [SerializeField]
-    Texture2D[] fallBackTextures;
-
-    // Use this for initialization
-    void Start()
+    private void Awake()
     {
-        if (visual == null)
-        {
-            visual = GetComponent<Renderer>();
-        }
-
         InitTexture();
     }
 
@@ -37,47 +42,116 @@ public class ImageLoader : MonoBehaviour
         if (loadFromInternet)
         {
             LoadConfig();
-            StartCoroutine(LoadTextureFromURL(GetRandomURLFromConfig()));
+
+            CheckIfFilesExist();            
+        }
+    }
+
+    private void CheckIfFilesExist()
+    {
+        foreach (string s in config)
+        {
+            CheckIfFileExists(s);
+        }
+    }
+
+    private void CheckIfFileExists(string s)
+    {
+        string path = GetLocalPathFromURL(s);
+
+        if (!File.Exists(path))
+        {
+            Debug.Log("File does not exist. loading INTO cache: " + path);
+            StartCoroutine(LoadTextureFromURL(s));
         }
         else
-        {
-            visual.material.mainTexture = fallBackTextures[UnityEngine.Random.Range(0, fallBackTextures.Length)];
+        {            
+            StartCoroutine(LoadTextureFromCache(path));
         }
     }
-
-    private string GetRandomURLFromConfig(int ttl = 100)
+    
+    /// <summary>
+    /// URL is too long, convert it to short path
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
+    private string GetLocalPathFromURL(string s)
     {
-        if (ttl <= 0)
-            return "";
-
-        string url = config[UnityEngine.Random.Range(0, config.Length)];
-
-        if (url.Length < 5)
-            url = GetRandomURLFromConfig(ttl - 1);
-
-        return url;
+        return Application.persistentDataPath + "/" + s.GetHashCode() + ".jpg";
     }
-
-
+        
     IEnumerator LoadTextureFromURL(string url)
     {
-        Debug.Log("Trying: URL: " + url);
-
         Texture2D tex;
-        tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+        tex = new Texture2D(4, 4, TextureFormat.RGB24, false);
         WWW www = new WWW(url);
         yield return www;
         www.LoadImageIntoTexture(tex);
         if (tex != null)
         {
-            visual.material.mainTexture = tex;
+            TextureManager.Instance.AddTexture(tex);
+            SaveTextureToCache(tex, url);
+        }
+    }
+
+    /// <summary>
+    /// Loads texture from local cache and adds it to a list.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    private IEnumerator LoadTextureFromCache(string path)
+    {
+        if (!File.Exists(path))
+        {
+            yield return null;
         }
 
+        Texture2D tex;
+        tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+        tex.name = Path.GetFileName(path);
+
+        WWW www = new WWW("File://"+path);
+        yield return www;
+        www.LoadImageIntoTexture(tex);
+        // If no texture was loaded, tex.width is still 4.
+        if (tex.width>4)
+        {            
+            TextureManager.Instance.AddTexture(tex);
+        }
+
+    }
+
+    /// <summary>
+    /// Save texture in persistant data path
+    /// </summary>
+    /// <param name="tex"></param>
+    /// <param name="url"></param>
+    private void SaveTextureToCache(Texture2D tex, string url)
+    {
+        string path = GetLocalPathFromURL(url);
+
+        if (File.Exists(path))
+        {
+            throw new System.Exception("File already exists! " + path);
+        }
+
+        byte[] bytes = tex.EncodeToJPG();
+        File.WriteAllBytes(path, bytes);
     }
 
     private void LoadConfig()
     {
         string fs = configFile.text;
-        config = Regex.Split(fs, "\n|\r|\r\n");
+       
+        List<string> temp = new List<string>();
+
+        foreach (string s in Regex.Split(fs, "\n|\r|\r\n"))
+        {
+            if(!string.IsNullOrEmpty(s))
+            {
+                temp.Add(s);
+            }
+        }
+        config = temp.ToArray();
     }
 }
